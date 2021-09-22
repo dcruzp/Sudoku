@@ -22,6 +22,8 @@ namespace Sudoku
         Form2 selector;
         Button[,] buttons;
 
+        bool error; 
+
         Button btnCurrentSelect = null; 
 
         Color colorbutton = Color.LightCyan;
@@ -51,7 +53,7 @@ namespace Sudoku
             board.Generate();
             this.picBox.Size = new Size(400, 400);
             buttons = new Button[this.board.Rows, this.board.Columns];
-
+            this.error = false; 
             
             InsertBottomDialog(); 
             InsertButton();
@@ -131,7 +133,9 @@ namespace Sudoku
         private void Btn_MouseLeave(object sender, EventArgs e)
         {
             Button current = (Button)sender;
-            current.BackColor = Color.LightCyan;
+            var index = findByReference(buttons, current);
+            if (!this.board[index.Item1,index.Item2].BadCell)
+                current.BackColor = Color.LightCyan;
 
             for (int i = 0; i < this.buttons.GetLength(0); i++)
             {
@@ -158,7 +162,7 @@ namespace Sudoku
                     int df = row + dirf[i] * k;
                     int dc = column + dirc[i] * k;
 
-                    if (inrange(df, dc))
+                    if (inrange(df, dc)&& !this.board[df,dc].BadCell)
                     {
                         this.buttons[df, dc].BackColor = color; 
                     }
@@ -179,6 +183,8 @@ namespace Sudoku
                     int df = rf * this.board.Sqrt + i;
                     int dc = rc * this.board.Sqrt + j;
 
+                    if (this.board[df, dc].BadCell)
+                        continue;
                     this.buttons[df, dc].BackColor = color;              
                 }
             }
@@ -197,6 +203,8 @@ namespace Sudoku
             {
                 for (int j = 0; j < this.buttons.GetLength(1); j++)
                 {
+                    if (this.board[i, j].BadCell)
+                        continue;
                     if (this.buttons[i, j].Name == current.Name)
                     {
                         PrintSimilarElementRowandColmun(i, j , colorselectbutton);
@@ -204,7 +212,10 @@ namespace Sudoku
                     }
                 }
             }
-            current.BackColor = Color.Yellow;
+
+            var index = findByReference(buttons, current);
+            if (!this.board[index.Item1,index.Item2].BadCell)
+                current.BackColor = Color.Yellow;
         }
 
         private void Btn_MouseClick(object sender, MouseEventArgs e)
@@ -222,7 +233,8 @@ namespace Sudoku
             if (index.Item1 == -1 && index.Item2 == -1)
                 throw new IndexOutOfRangeException("Invalid index of button");
 
-            if (this.board[index.Item1, index.Item2].Type != typecell.empty)
+            if (this.board[index.Item1, index.Item2].Type != typecell.empty &&
+                !this.board[index.Item1, index.Item2].BadCell)
                 return;
 
             selector.Location = Cursor.Position;
@@ -231,13 +243,14 @@ namespace Sudoku
             {
                 this.board[index.Item1, index.Item2].Type = (typecell)selector.Number;
                 button.Text = selector.Number.ToString();
+                this.error = false;
 
                 if (this.board.checkSimilarElementRowColumnRegion(index.Item1,index.Item2))
                 {
-                    button.BackColor = Color.Red; 
+                    button.BackColor = Color.Red;
+                    this.board[index.Item1, index.Item2].BadCell = true;
+                    this.error = true;
                 }
-
-                
                 selector.Hide();
             }
 

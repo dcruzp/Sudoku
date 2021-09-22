@@ -8,21 +8,29 @@ namespace Sudoku.Engine
 {
     class Cell 
     {
-        typecell type; 
-        public Cell()
+        typecell type;
+        bool badCell; 
+
+        public Cell():this(typecell.empty)
         {
-            this.type = typecell.empty; 
         }
 
         public Cell (typecell typecell )
         {
-            this.type = typecell; 
+            this.type = typecell;
+            this.badCell = false; 
         }
 
         public typecell Type
         {
             get => this.type;
             set => this.type = value; 
+        }
+
+        public bool BadCell
+        {
+            get => this.badCell;
+            set => this.badCell = value; 
         }
     }
 }
