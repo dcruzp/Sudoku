@@ -244,6 +244,8 @@ namespace Sudoku
                 this.board[index.Item1, index.Item2].Type = (typecell)selector.Number;
                 button.Text = selector.Number.ToString();
                 this.error = false;
+                this.board[index.Item1, index.Item2].BadCell = false;
+                button.BackColor = colorbutton;
 
                 if (this.board.checkSimilarElementRowColumnRegion(index.Item1,index.Item2))
                 {
